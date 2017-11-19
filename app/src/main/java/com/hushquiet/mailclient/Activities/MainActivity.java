@@ -1,6 +1,9 @@
 package com.hushquiet.mailclient.Activities;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -17,14 +20,67 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.hushquiet.mailclient.Activities.Interfaces.ICallBackMessage;
+import com.hushquiet.mailclient.Activities.Interfaces.IFragment;
+import com.hushquiet.mailclient.Activities.Interfaces.IFragmentSend;
+import com.hushquiet.mailclient.Activities.Interfaces.OnFragmentInteractionListener;
 import com.hushquiet.mailclient.DB.DB;
+import com.hushquiet.mailclient.Helpers.MyMessage;
+import com.hushquiet.mailclient.Mail.Mail;
 import com.hushquiet.mailclient.R;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener, ICallBackMessage {
 
     private DB db;
+    private Fragment fragmentInbox, fragmentDeleted, fragmentDrafts,
+            fragmentMailboxes, fragmentSend, fragmentSettings,
+            fragmentMessage, fragmentSent;
+    private Fragment fragment;
+    private FloatingActionButton fab;
+    public static final int DRAFTSFRAGMENT = 0;
+    public static final int INBOXFRAGMENT = 1;
+    public static final int DELETEDFRAGMENT = 2;
+    public static final int SENTFRAGMENT = 3;
+
+    private void initFragment() {
+        Class fragmentClass = null;
+
+        try {
+            fragmentClass = InboxFragment.class;
+            fragmentInbox = (Fragment)fragmentClass.newInstance();
+
+            fragmentClass = DeletedFragment.class;
+            fragmentDeleted = (Fragment)fragmentClass.newInstance();
+
+            fragmentClass = DraftsFragment.class;
+            fragmentDrafts = (Fragment)fragmentClass.newInstance();
+
+            fragmentClass = MailboxesFragment.class;
+            fragmentMailboxes = (Fragment)fragmentClass.newInstance();
+
+            fragmentClass = SendFragment.class;
+            fragmentSend = (Fragment)fragmentClass.newInstance();
+
+            fragmentClass = SettingsFragment.class;
+            fragmentSettings = (Fragment)fragmentClass.newInstance();
+
+            fragmentClass = MessageFragment.class;
+            fragmentMessage = (Fragment)fragmentClass.newInstance();
+
+            fragmentClass = SentFragment.class;
+            fragmentSent = (Fragment)fragmentClass.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,13 +88,14 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        Mail.activity = this;
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                fragment = fragmentSend;
+                setFragment("Отправка сообщения");
+                ((SendFragment)fragment).setMessage(null);
             }
         });
 
@@ -50,9 +107,11 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        setFragment(InboxFragment.class, "Входящие");
         navigationView.getMenu().getItem(0).setChecked(true);
         db = DB.getInstance(getApplicationContext());
+        initFragment();
+        fragment = fragmentInbox;
+                setFragment("Входящие");
     }
 
     @Override
@@ -80,8 +139,8 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.reload) {
+            ((IFragment)fragment).reload();
         }
 
         return super.onOptionsItemSelected(item);
@@ -91,39 +150,35 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Создадим новый фрагмент
-        Fragment fragment = null;
-        Class fragmentClass = null;
 
         int id = item.getItemId();
 
         if (id == R.id.nav_inbox) {
-            fragmentClass = InboxFragment.class;
+            fragment = fragmentInbox;
         } else if (id == R.id.nav_sent) {
-            fragmentClass = SentFragment.class;
+            fragment = fragmentSent;
         } else if (id == R.id.nav_drafts) {
-            fragmentClass = DraftsFragment.class;
+            fragment = fragmentDrafts;
         } else if (id == R.id.nav_deleted) {
-            fragmentClass = DeletedFragment.class;
+            fragment = fragmentDeleted;
         } else if (id == R.id.nav_settings) {
-            fragmentClass = SettingsFragment.class;
+            fragment = fragmentSettings;
         } else if (id == R.id.nav_logout) {
-            if (db.logout()) {
+            if (db.deleteAuthUser()) {
                 Intent intent = new Intent();
                 intent.setClass(this, AuthActivity.class);
                 startActivity(intent);
                 finish();
             }
+        } else if (id == R.id.nav_mailboxes) {
+            fragment = fragmentMailboxes;
         }
 
         try {
-            if (fragmentClass != null) {
-                fragment = (Fragment) fragmentClass.newInstance();
-                // Вставляем фрагмент, заменяя текущий фрагмент
+            if (fragment != null) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
-                // Выделяем выбранный пункт меню в шторке
                 item.setChecked(true);
-                // Выводим выбранный пункт в заголовке
                 setTitle(item.getTitle());
             }
         } catch (Exception e) {
@@ -135,12 +190,9 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void setFragment(Class fragmentClass, String title) {
-        Fragment fragment = null;
+    private void setFragment(String title) {
         try {
-            if (fragmentClass != null) {
-                fragment = (Fragment) fragmentClass.newInstance();
-                // Вставляем фрагмент, заменяя текущий фрагмент
+            if (fragment != null) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
                 // Выделяем выбранный пункт меню в шторке
@@ -152,7 +204,60 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onFragmentInteraction(int state) {
 
+    }
+
+    @Override
+    public Cursor getPath(Uri uri) {
+       /* final Cursor cursor = getContentResolver().query( uri, null, null, null, null );
+        cursor.moveToFirst();
+        return cursor;*/
+        InputStream is = null;
+        try {
+            is = getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(is);
+            is.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
+    @Override
+    public void setMessageFragment(MyMessage m, int state) {
+        switch (state) {
+            case DRAFTSFRAGMENT:
+                Class fragmentClass = SendFragment.class;
+                try {
+                    Fragment fr = (Fragment)fragmentClass.newInstance();
+                    fragment = fr;
+                    setFragment("Черновик");
+                    ((SendFragment)fr).setMessage(m);
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case DELETEDFRAGMENT:
+                fragment = fragmentMessage;
+                setFragment("Сообщение");
+                ((MessageFragment)fragment).setMessage(m);
+                break;
+            case INBOXFRAGMENT:
+                fragment = fragmentMessage;
+                setFragment("Сообщение");
+                ((MessageFragment)fragment).setMessage(m);
+                break;
+            case SENTFRAGMENT:
+                fragment = fragmentMessage;
+                setFragment("Отправленные");
+                ((MessageFragment)fragment).setMessage(m);
+                break;
+        }
     }
 }

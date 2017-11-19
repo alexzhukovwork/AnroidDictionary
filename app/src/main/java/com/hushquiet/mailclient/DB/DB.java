@@ -8,6 +8,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.hushquiet.mailclient.Helpers.MailBox;
+import com.hushquiet.mailclient.Helpers.MessageContainer;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,6 +30,18 @@ public class DB extends SQLiteOpenHelper {
     public static final String FOLDERTYPES_TABLE = "FolderTypes";
     public static final String FILES_TABLE = "Files";
     public static final String AUTHUSER_TABLE = "AuthUser";
+    public static final String SETTINGS_TABLE = "Settings";
+
+    // Поля для таблицы Settings
+    public static final String SETTINGS_ID = "_id";
+    public static final String SETTINGS_USER = "id_user";
+    public static final String SETTINGS_CRYPT = "crypt";
+    public static final String SETTINGS_SIGN = "sign";
+    public static final String SETTINGS_MAILBOX = "mailbox";
+    public static final String SETTINGS_IMAP_SERVER = "imap_server";
+    public static final String SETTINGS_IMAP_PORT = "imap_port";
+    public static final String SETTINGS_SMTP_SERVER = "smtp_server";
+    public static final String SETTINGS_SMTP_PORT = "smtp_port";
 
     // Поля для таблицы AuthUser
     public static final String AUTHUSER_ID = "_id";
@@ -35,6 +50,10 @@ public class DB extends SQLiteOpenHelper {
 
     // Поля таблицы users
     public static final String USERS_ID = "_id";
+    public static final String USERS_PUBLIC_KEY_RSA = "public_key_rsa";
+    public static final String USERS_PRIVATE_KEY_RSA = "private_key_rsa";
+    public static final String USERS_PUBLIC_KEY_DSA = "public_key_dsa";
+    public static final String USERS_PRIVATE_KEY_DSA = "private_key_dsa";
     public static final String USERS_NAME = "name";
     public static final String USERS_LAST_NAME = "last_name";
     public static final String USERS_LOGIN = "login";
@@ -50,10 +69,12 @@ public class DB extends SQLiteOpenHelper {
     public static final String MESSAGES_ID = "_id";
     public static final String MESSAGES_SUBJECT = "subject";
     public static final String MESSAGES_BODY = "body";
-    public static final String MESSAGES_FROM = "from";
-    public static final String MESSAGES_FOLDER = "id_folder";
-    public static final String MESSAGES_TO = "to";
-    public static final String MESSAGES_DATA = "data";
+    public static final String MESSAGES_FROM = "from_mail";
+    public static final String MESSAGES_FOLDER = "folder";
+    public static final String MESSAGES_TO = "to_mail";
+    public static final String MESSAGES_DATE = "date";
+    public static final String MESSAGES_MAILBOX = "mailbox";
+    public static final String MESSAGES_SIGN = "sign";
 
     // Поля таблицы Folders
     public static final String FOLDERS_ID = "_id";
@@ -64,10 +85,18 @@ public class DB extends SQLiteOpenHelper {
     public static final String FOLDERTYPES_ID = "_id";
     public static final String FOLDERTYPES_NAME = "name";
 
+    // Mailbox types
+    public static final int INBOX = 1;
+    public static final int SENT = 2;
+    public static final int DRAFTS = 3;
+    public static final int DELETED = 4;
+
+
     // Поля таблицы Files
     public static final String FILES_ID = "_id";
     public static final String FILES_DATA = "data";
     public static final String FILES_MESSAGE = "id_message";
+    public static final String FILES_NAME = "name";
 
     private static String DB_PATH; // полный путь к базе данных
     private static String DB_NAME = "DataBase.db";
@@ -147,17 +176,139 @@ public class DB extends SQLiteOpenHelper {
         return db;
     }
 
+    public MessageContainer getMessages(int folderId) {
+        MailBox mailBox = getCurrentMailbox();
+        MessageContainer messageContainer = null;
+        if (mailBox != null) {
+            Cursor cursor = db.query(MESSAGES_TABLE, new String[]{
+                            MESSAGES_BODY, MESSAGES_DATE, MESSAGES_FOLDER, MESSAGES_FROM,
+                            MESSAGES_ID, MESSAGES_SIGN, MESSAGES_MAILBOX, MESSAGES_TO, MESSAGES_SUBJECT},
+                    MESSAGES_MAILBOX + " = ? AND " + MESSAGES_FOLDER + " = ?",
+                    new String[]{mailBox.id + "", folderId + ""},
+                    null,
+                    null,
+                    MESSAGES_ID + " DESC");
+            messageContainer = new MessageContainer(cursor);
+        }
+        return messageContainer;
+    }
+
     public Cursor getCursor() {
         return cursor;
     }
 
-    public boolean addToUsers(String lastName, String name, String login, String password) {
+    public boolean updateSettings(int userId, int sign, int crypt, int mailbox) {
+        ContentValues cv = new ContentValues();
+        cv.put(SETTINGS_SIGN, sign);
+        cv.put(SETTINGS_CRYPT, crypt);
+        cv.put(SETTINGS_MAILBOX, mailbox);
+        return db.update(SETTINGS_TABLE, cv, SETTINGS_USER + " = ?", new String[]{userId + ""}) > -1;
+    }
+
+    public boolean updateUser(int userId, String name, String lastName) {
+        ContentValues cv = new ContentValues();
+        cv.put(USERS_LAST_NAME, lastName);
+        cv.put(USERS_NAME, name);
+        return db.update(USERS_TABLE, cv, USERS_ID + " = ?", new String[]{userId + ""}) > -1;
+    }
+
+
+    public boolean addToUsers(String lastName, String name, String login, String password,
+                              byte[] privateKeyRsa, byte[] privateKeyDsa, byte[] publicKeyRsa, byte[] publicKeyDsa) {
         ContentValues cv = new ContentValues();
         cv.put(USERS_LAST_NAME, lastName);
         cv.put(USERS_NAME, name);
         cv.put(USERS_LOGIN, login);
         cv.put(USERS_PASSWORD, password);
+        cv.put(USERS_PRIVATE_KEY_DSA, privateKeyDsa);
+        cv.put(USERS_PUBLIC_KEY_DSA, publicKeyDsa);
+        cv.put(USERS_PRIVATE_KEY_RSA, privateKeyRsa);
+        cv.put(USERS_PUBLIC_KEY_RSA, publicKeyRsa);
         return db.insert(USERS_TABLE, null, cv) > -1;
+    }
+
+    public boolean addToSettings(int idUser) {
+        ContentValues cv = new ContentValues();
+        cv.put(SETTINGS_USER, idUser);
+        cv.put(SETTINGS_CRYPT, 0);
+        cv.put(SETTINGS_SIGN, 0);
+        cv.put(SETTINGS_MAILBOX, -1);
+        return db.insert(SETTINGS_TABLE, null, cv) > -1;
+    }
+
+    public int getAuthUserID() {
+        cursor = db.query(AUTHUSER_TABLE, new String[]{AUTHUSER_ID}, null, null, null, null, null);
+        cursor.moveToFirst();
+        return cursor.getInt(cursor.getColumnIndex(AUTHUSER_ID));
+    }
+
+    public Cursor getSettings(int userId) {
+        cursor = db.query(SETTINGS_TABLE, new String[]{SETTINGS_CRYPT, SETTINGS_SIGN, SETTINGS_IMAP_PORT, SETTINGS_IMAP_SERVER,
+                SETTINGS_MAILBOX, SETTINGS_SMTP_PORT, SETTINGS_SMTP_SERVER}, SETTINGS_USER + " = ?",
+                new String[]{userId + ""}, null, null, null);
+        cursor.moveToFirst();
+        return cursor;
+    }
+
+    public Cursor getUser(int userId) {
+        cursor = db.query(USERS_TABLE, new String[]{USERS_LAST_NAME, USERS_NAME, USERS_PASSWORD, USERS_ID, USERS_PRIVATE_KEY_RSA, USERS_PRIVATE_KEY_DSA,
+                USERS_PUBLIC_KEY_DSA, USERS_PUBLIC_KEY_RSA, USERS_LOGIN}, USERS_ID + " = ?",
+                new String[]{userId + ""}, null, null, null);
+        cursor.moveToFirst();
+        return cursor;
+    }
+
+    public Cursor getMailBoxes(int userId) {
+        cursor = db.query(MAILBOXES_TABLE, new String[]{MAILBOXES_MAIL}, MAILBOXES_USER + " = ?",
+                new String[]{userId + ""}, null, null, null);
+        return cursor;
+    }
+
+    public int getUserByLogin(String login) {
+        cursor = db.query(USERS_TABLE, new String[]{USERS_ID}, USERS_LOGIN + " = ?",
+                new String[]{login}, null, null, null);
+        cursor.moveToFirst();
+        return cursor.getInt(cursor.getColumnIndex(USERS_ID));
+    }
+
+    public int getIdMailBox(String mail) {
+        cursor = db.query(MAILBOXES_TABLE, new String[]{MAILBOXES_ID}, MAILBOXES_MAIL + " = ?",
+                new String[]{mail}, null, null, null);
+        cursor.moveToFirst();
+        return cursor.getInt(cursor.getColumnIndex(MAILBOXES_ID));
+    }
+
+    public String getMailboxById(int id) {
+        cursor = db.query(MAILBOXES_TABLE, new String[]{MAILBOXES_MAIL}, MAILBOXES_ID + " = ?",
+                new String[]{id + ""}, null, null, null);
+        cursor.moveToFirst();
+        return cursor.getString(cursor.getColumnIndex(MAILBOXES_MAIL));
+    }
+
+    public MailBox getCurrentMailbox() {
+        MailBox mailBox = null;
+        Cursor cursor = db.query(SETTINGS_TABLE, new String []{SETTINGS_MAILBOX}, null, null, null, null, null);
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            int i = cursor.getInt(cursor.getColumnIndex(SETTINGS_MAILBOX));
+            cursor = db.query(MAILBOXES_TABLE, new String[]{MAILBOXES_MAIL, MAILBOXES_ID, MAILBOXES_PASSWORD}, MAILBOXES_ID + " = ?",
+                    new String[]{i + ""}, null, null, null);
+            if (cursor.getCount() > 0) {
+                mailBox = new MailBox();
+                cursor.moveToFirst();
+                mailBox.id = cursor.getInt(cursor.getColumnIndex(MAILBOXES_ID));
+                mailBox.email = cursor.getString(cursor.getColumnIndex(MAILBOXES_MAIL));
+                mailBox.password = cursor.getString(cursor.getColumnIndex(MAILBOXES_PASSWORD));
+            }
+        }
+        return mailBox;
+    }
+
+    public int getMailFromSetting(int userId) {
+        cursor = db.query(SETTINGS_TABLE, new String[]{SETTINGS_MAILBOX}, SETTINGS_USER + " = ?",
+                new String[]{userId +""}, null, null, null);
+        cursor.moveToFirst();
+        return cursor.getInt(cursor.getColumnIndex(SETTINGS_MAILBOX));
     }
 
     public boolean addToMailBoxes(String mail, String password, int user) {
@@ -168,15 +319,40 @@ public class DB extends SQLiteOpenHelper {
         return db.insert(MAILBOXES_TABLE, null, cv) > -1;
     }
 
-    public boolean addToMessages(String subject, String body, String from, String to, int folder) {
+    public boolean addToMessages(String subject, String body, String from, String to, String date, int folder, int mailbox, String [] fileNames, byte [] data, int sign) {
         ContentValues cv = new ContentValues();
         cv.put(MESSAGES_SUBJECT, subject);
         cv.put(MESSAGES_BODY, body);
         cv.put(MESSAGES_FROM, from);
         cv.put(MESSAGES_FOLDER, folder);
         cv.put(MESSAGES_TO, to);
-        //cv.put(MESSAGES_DATA, data);
-        return db.insert(MESSAGES_TABLE, null, cv) > -1;
+        cv.put(MESSAGES_DATE, date);
+        cv.put(MESSAGES_MAILBOX, mailbox);
+        cv.put(MESSAGES_SIGN, sign);
+
+        long id = db.insert(MESSAGES_TABLE, null, cv);
+
+        if (data != null) {
+            addToFiles(data, fileNames, id);
+        }
+
+        return id > -1;
+    }
+
+    public boolean addToFiles(byte [] arr, String [] fileNames, long messageId) {
+        ContentValues cv = new ContentValues();
+        cv.put(FILES_DATA, arr);
+        cv.put(FILES_MESSAGE, messageId);
+        cv.put(FILES_NAME, fileNames[0]);
+        return db.insert(FILES_TABLE, null, cv) > -1;
+    }
+
+    public Cursor getFiles(int messageId) {
+        Cursor cursor = db.query(FILES_TABLE, new String[]{FILES_DATA, FILES_NAME}, FILES_MESSAGE + " = ?",
+                new String[]{messageId + ""}, null, null, null);
+        if (cursor.getCount() > 0)
+            cursor.moveToFirst();
+        return cursor;
     }
 
     public boolean addToFolders(int type, int mailBox) {
@@ -204,12 +380,18 @@ public class DB extends SQLiteOpenHelper {
         return db.insert(AUTHUSER_TABLE, null, cv) > -1;
     }
 
-    public boolean logout() {
+    public boolean deleteAuthUser() {
         cursor = cursor = db.query(AUTHUSER_TABLE, new String[]{AUTHUSER_LOGIN}, null, null, null, null, null);
         cursor.moveToFirst();
         return db.delete(AUTHUSER_TABLE,
                 AUTHUSER_LOGIN + " = ?",
                 new String[]{cursor.getString(cursor.getColumnIndex(AUTHUSER_LOGIN))}) > 0;
+    }
+
+    public boolean deleteMessage(int id) {
+        return db.delete(MESSAGES_TABLE,
+                MESSAGES_ID + " = ?",
+                new String[]{id + ""}) > 0;
     }
 
     public boolean isAuth() {

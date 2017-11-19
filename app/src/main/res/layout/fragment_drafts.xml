@@ -4,10 +4,9 @@
     android:layout_height="match_parent"
     tools:context="com.hushquiet.mailclient.Activities.DraftsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ListView
+        android:id="@+id/listViewDraftMessages"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Drafts" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>

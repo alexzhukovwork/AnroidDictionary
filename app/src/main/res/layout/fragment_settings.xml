@@ -20,7 +20,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <EditText
-                android:id="@+id/editText4"
+                android:id="@+id/editTextLastName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="60dp"
@@ -33,7 +33,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
-                android:id="@+id/editText5"
+                android:id="@+id/editTextName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
@@ -43,19 +43,19 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.502"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editText4" />
+                app:layout_constraintTop_toBottomOf="@+id/editTextLastName" />
 
             <Spinner
-                android:id="@+id/spinner2"
+                android:id="@+id/spinnerMailBoxes"
                 android:layout_width="212dp"
                 android:layout_height="46dp"
                 android:layout_marginTop="24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editText5" />
+                app:layout_constraintTop_toBottomOf="@+id/editTextName" />
 
             <CheckBox
-                android:id="@+id/checkBox"
+                android:id="@+id/checkBoxCrypt"
                 android:layout_width="262dp"
                 android:layout_height="61dp"
                 android:layout_marginTop="24dp"
@@ -65,10 +65,10 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.504"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/spinner2" />
+                app:layout_constraintTop_toBottomOf="@+id/spinnerMailBoxes" />
 
             <CheckBox
-                android:id="@+id/checkBox2"
+                android:id="@+id/checkBoxSign"
                 android:layout_width="262dp"
                 android:layout_height="48dp"
                 android:layout_marginTop="8dp"
@@ -77,10 +77,10 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkBox" />
+                app:layout_constraintTop_toBottomOf="@+id/checkBoxCrypt" />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/buttonSave"
                 android:layout_width="263dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
@@ -88,7 +88,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkBox2" />
+                app:layout_constraintTop_toBottomOf="@+id/checkBoxSign" />
         </android.support.constraint.ConstraintLayout>
 
         <android.support.constraint.Guideline

@@ -1,13 +1,19 @@
 package com.hushquiet.mailclient.Activities;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
+import com.hushquiet.mailclient.Activities.Interfaces.ICallBackMessage;
+import com.hushquiet.mailclient.Activities.Interfaces.OnFragmentInteractionListener;
+import com.hushquiet.mailclient.DB.DB;
+import com.hushquiet.mailclient.Helpers.MessageContainer;
 import com.hushquiet.mailclient.R;
 
 public class DraftsFragment extends Fragment {
@@ -16,11 +22,16 @@ public class DraftsFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    private ListView listViewMessages;
+    private MessageContainer messageContainer;
+    private Context context;
+    private ArrayAdapter<String> adapter;
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
-    private OnFragmentInteractionListener mListener;
+    private ICallBackMessage mListener;
 
     public DraftsFragment() {
         // Required empty public constructor
@@ -57,21 +68,39 @@ public class DraftsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_drafts, container, false);
+        final View root = inflater.inflate(R.layout.fragment_drafts, container, false);
+        listViewMessages = (ListView)root.findViewById(R.id.listViewDraftMessages);
+        context = root.getContext();
+        adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1);
+        listViewMessages.setAdapter(adapter);
+        setAdapter();
+
+        listViewMessages.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if (messageContainer != null) {
+                    mListener.setMessageFragment(messageContainer.getMessage(i), MainActivity.DRAFTSFRAGMENT);
+                }
+            }
+        });
+        return root;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+    private void setAdapter() {
+        DB db = DB.getInstance(context);
+        messageContainer = db.getMessages(DB.DRAFTS);
+        if (messageContainer != null) {
+            for (int i = 0; i < messageContainer.getCount(); i++) {
+                adapter.add(messageContainer.getMessage(i).to.equals("") ? i + "" : messageContainer.getMessage(i).to);
+            }
         }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof ICallBackMessage) {
+            mListener = (ICallBackMessage) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
