@@ -1,6 +1,8 @@
 package com.hushquiet.mailclient.Activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -45,6 +47,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
@@ -71,6 +74,7 @@ public class SendFragment extends Fragment implements IFragmentSend {
     private EditText editTextTo;
     private EditText editTextBody;
     private EditText editTextSubject;
+    private EditText editTextKey;
     private Button buttonSend;
     private Button buttonAdd;
     private ImageView imageView;
@@ -125,6 +129,8 @@ public class SendFragment extends Fragment implements IFragmentSend {
         editTextBody = (EditText)root.findViewById(R.id.editTextBody);
         editTextTo = (EditText)root.findViewById(R.id.editTextTo);
         editTextSubject = (EditText)root.findViewById(R.id.editTextSubject);
+        editTextKey = (EditText)root.findViewById(R.id.editTextKey);
+        editTextKey.setVisibility(View.INVISIBLE);
         buttonSend = (Button)root.findViewById(R.id.buttonSend);
         mailBox = DB.getInstance(root.getContext()).getCurrentMailbox();
         buttonAdd = (Button)root.findViewById(R.id.buttonAdd);
@@ -134,6 +140,46 @@ public class SendFragment extends Fragment implements IFragmentSend {
         DB db = DB.getInstance(context);
         settings = new Settings(db.getSettings(db.getAuthUserID()));
         user = new User(db.getUser(db.getAuthUserID()));
+        if (settings.crypt) {
+            editTextKey.setVisibility(View.VISIBLE);
+            Button button = new Button(context);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (!editTextTo.getText().toString().equals("")) {
+                        try {
+                            new SendMailTask(getActivity(), fragmentSend).execute(
+                                    editTextTo.getText(),
+                                    "Ключ",
+                                    "Мой ключ для RSA шифрования: " +
+                                            RSA.publicKeyToString(RSA.getPublicKey(user.publicKeyRSA)),
+                                    mailBox.email,
+                                    mailBox.password,
+                                    filePath
+                            );
+                        } catch (NoSuchAlgorithmException e) {
+                            e.printStackTrace();
+                        } catch (InvalidKeySpecException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        builder.setTitle("Ошибка")
+                                .setMessage("Требуется ввести получателя")
+                                .setCancelable(false)
+                                .setNegativeButton("Продолжить",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                        AlertDialog alert = builder.create();
+                        alert.show();
+                    }
+                }
+            });
+            layout.addView(button);
+        }
 
         if (message != null) {
             editTextTo.setText(message.to);
@@ -188,6 +234,7 @@ public class SendFragment extends Fragment implements IFragmentSend {
                         e.printStackTrace();
                     }
                     SecretKey secretKey = null;
+                    String publicKey = null;
                     String body = editTextBody.getText().toString();
                     String subject = editTextSubject.getText().toString();
                     subject += (settings.sign ? "[SIGNDSA]" : "") + (settings.crypt ? "[CRYPT]" : "");
@@ -200,7 +247,9 @@ public class SendFragment extends Fragment implements IFragmentSend {
                             desEncrypter.setKey(secretKey);
                             body = desEncrypter.encrypt(body);
                             String key = DesEncrypter.keyToString(secretKey);
-                            key = RSA.encrypt(key, RSA.getPublicKey(user.publicKeyRSA));
+                            publicKey = editTextKey.getText().toString();
+                            publicKey = publicKey.replace(" ", "");
+                            key = RSA.encrypt(key, RSA.stringToPublicKey(publicKey));
                             body += "[" + key;
                         } catch (NoSuchAlgorithmException e) {
                             e.printStackTrace();

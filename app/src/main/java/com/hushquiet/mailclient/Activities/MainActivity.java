@@ -249,7 +249,14 @@ public class MainActivity extends AppCompatActivity
                 ((MessageFragment)fragment).setMessage(m);
                 break;
             case INBOXFRAGMENT:
-                fragment = fragmentMessage;
+                Class myClass = MessageFragment.class;
+                try {
+                    fragment = (Fragment)myClass.newInstance();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
                 setFragment("Сообщение");
                 ((MessageFragment)fragment).setMessage(m);
                 break;

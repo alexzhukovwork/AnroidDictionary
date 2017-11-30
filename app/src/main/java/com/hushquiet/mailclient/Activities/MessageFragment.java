@@ -104,8 +104,9 @@ public class MessageFragment extends Fragment {
         textViewSubject.setText("Тема: " + (message.subject == null ? "" : message.subject));
         textViewFrom.setText("От: " + (message.from == null ? "" : message.from));
         textViewTo.setText("Кому: " + (message.to == null ? "" : message.to));
+        textViewBody.setTextIsSelectable(false);
         textViewBody.setText("\n" + (message.body == null ? "" : message.body) + "\n");
-
+        textViewBody.setTextIsSelectable(true);
         if (message != null) {
             String text;
             if (message.sign == 1)
