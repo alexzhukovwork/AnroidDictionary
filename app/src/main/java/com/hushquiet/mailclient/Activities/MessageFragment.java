@@ -1,14 +1,19 @@
 package com.hushquiet.mailclient.Activities;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -88,7 +93,7 @@ public class MessageFragment extends Fragment {
         final View root = inflater.inflate(R.layout.fragment_message, container, false);
         context = root.getContext();
         textViewApps = (TextView)root.findViewById(R.id.textViewApps);
-        textViewBody = (TextView)root.findViewById(R.id.textViewBody);
+        //textViewBody = (TextView)root.findViewById(R.id.textViewBody);
         textViewFrom = (TextView)root.findViewById(R.id.textViewFrom);
         textViewSubject = (TextView)root.findViewById(R.id.textViewSubject);
         textViewTo = (TextView)root.findViewById(R.id.textViewTo);
@@ -104,9 +109,16 @@ public class MessageFragment extends Fragment {
         textViewSubject.setText("Тема: " + (message.subject == null ? "" : message.subject));
         textViewFrom.setText("От: " + (message.from == null ? "" : message.from));
         textViewTo.setText("Кому: " + (message.to == null ? "" : message.to));
-        textViewBody.setTextIsSelectable(false);
-        textViewBody.setText("\n" + (message.body == null ? "" : message.body) + "\n");
-        textViewBody.setTextIsSelectable(true);
+//        textViewBody.setTextIsSelectable(false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        //    textViewBody.setText("\n" + (message.body == null ? "" : Html.fromHtml(message.body, Html.FROM_HTML_MODE_COMPACT) + "\n"));
+        } else {
+            Spanned htmlAsSpanned = Html.fromHtml(getString(R.string.html));
+            WebView webView = ((WebView)root.findViewById(R.id.textViewB));
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.loadDataWithBaseURL("", message.body == null ? "" : message.body, "text/html", "UTF-8", "");
+        }
+//        textViewBody.setTextIsSelectable(true);
         if (message != null) {
             String text;
             if (message.sign == 1)

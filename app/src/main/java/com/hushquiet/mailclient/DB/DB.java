@@ -197,11 +197,15 @@ public class DB extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public boolean updateSettings(int userId, int sign, int crypt, int mailbox) {
+    public boolean updateSettings(int userId, int sign, int crypt, int mailbox, int smtpPort, int imapPort, String imapServer, String smtpServer) {
         ContentValues cv = new ContentValues();
         cv.put(SETTINGS_SIGN, sign);
         cv.put(SETTINGS_CRYPT, crypt);
         cv.put(SETTINGS_MAILBOX, mailbox);
+        cv.put(SETTINGS_SMTP_PORT, smtpPort);
+        cv.put(SETTINGS_IMAP_PORT, imapPort);
+        cv.put(SETTINGS_IMAP_SERVER, imapServer);
+        cv.put(SETTINGS_SMTP_SERVER, smtpServer);
         return db.update(SETTINGS_TABLE, cv, SETTINGS_USER + " = ?", new String[]{userId + ""}) > -1;
     }
 
@@ -233,6 +237,10 @@ public class DB extends SQLiteOpenHelper {
         cv.put(SETTINGS_CRYPT, 0);
         cv.put(SETTINGS_SIGN, 0);
         cv.put(SETTINGS_MAILBOX, -1);
+        cv.put(SETTINGS_SMTP_SERVER, "");
+        cv.put(SETTINGS_IMAP_SERVER, "");
+        cv.put(SETTINGS_IMAP_PORT, 0);
+        cv.put(SETTINGS_SMTP_PORT, 0);
         return db.insert(SETTINGS_TABLE, null, cv) > -1;
     }
 

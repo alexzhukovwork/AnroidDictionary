@@ -63,24 +63,43 @@
                 app:layout_constraintStart_toEndOf="@+id/space"
                 app:layout_constraintTop_toBottomOf="@+id/textViewFrom" />
 
-            <TextView
+         <!-- <TextView
                 android:id="@+id/textViewBody"
-                android:padding="10dp"
-                android:textSize="20sp"
-                android:background="@drawable/border"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:background="@drawable/border"
+                android:padding="10dp"
                 android:text="TextView"
                 android:textIsSelectable="true"
+                android:textSize="20sp"
                 app:layout_constraintBottom_toTopOf="@+id/textViewApps"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/space"
                 app:layout_constraintTop_toBottomOf="@+id/textViewSubject"
-                app:layout_constraintVertical_bias="0.625" />
+                app:layout_constraintVertical_bias="0.625" /> -->
+            <WebView
+                android:id="@+id/textViewB"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/border"
+                android:padding="10dp"
+                android:text="TextView"
+                android:textIsSelectable="true"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toTopOf="@+id/textViewApps"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/space"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSubject"
+                app:layout_constraintVertical_bias="0.625"
+                tools:ignore="WebViewLayout" />
             <TextView
                 android:id="@+id/textViewApps"
                 android:textSize="20sp"

@@ -9,94 +9,277 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <android.support.constraint.ConstraintLayout
-            android:layout_width="366dp"
-            android:layout_height="484dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <EditText
-                android:id="@+id/editTextLastName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="60dp"
-                android:ems="10"
-                android:inputType="textPersonName"
-                android:text="Last Name"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <EditText
-                android:id="@+id/editTextName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:ems="10"
-                android:inputType="textPersonName"
-                android:text="Name"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.502"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editTextLastName" />
-
-            <Spinner
-                android:id="@+id/spinnerMailBoxes"
-                android:layout_width="212dp"
-                android:layout_height="46dp"
-                android:layout_marginTop="24dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editTextName" />
-
-            <CheckBox
-                android:id="@+id/checkBoxCrypt"
-                android:layout_width="262dp"
-                android:layout_height="61dp"
-                android:layout_marginTop="24dp"
-                android:ems="10"
-                android:text="Шифровать содержимое сообщения"
-                android:textSize="18sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.504"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/spinnerMailBoxes" />
-
-            <CheckBox
-                android:id="@+id/checkBoxSign"
-                android:layout_width="262dp"
-                android:layout_height="48dp"
+        <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/ScrollView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="366dp"
+                android:layout_height="716dp"
                 android:layout_marginTop="8dp"
-                android:text="Подписывать сообщение"
-                android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkBoxCrypt" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <Button
-                android:id="@+id/buttonSave"
-                android:layout_width="263dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Сохранить"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkBoxSign" />
-        </android.support.constraint.ConstraintLayout>
+                <LinearLayout
+                    android:id="@+id/lLastName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:drawableBottom="@drawable/line"
+                    android:orientation="horizontal"
+                    android:padding="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:width="60pt"
+                        android:text="Фамилия"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0" />
+
+                    <EditText
+                        android:id="@+id/editTextLastName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:inputType="textPersonName"
+                        android:text="Last Name"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/lName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:drawableBottom="@drawable/line"
+                    android:orientation="horizontal"
+                    android:padding="15dp"
+                    app:layout_constraintTop_toBottomOf="@+id/lLastName">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:width="60pt"
+                        android:text="Имя"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0" />
+
+                    <EditText
+                        android:id="@+id/editTextName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:inputType="textPersonName"
+                        android:text="Name"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.502"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lImapServer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:drawableBottom="@drawable/line"
+                    android:orientation="horizontal"
+                    android:padding="15dp"
+                    app:layout_constraintTop_toBottomOf="@+id/lName">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:width="60pt"
+                        android:text="Imap сервер"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0" />
+
+                    <EditText
+                        android:id="@+id/editTextImapServer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:inputType="textPersonName"
+                        android:text="Imap server"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.502"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lImapPort"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:drawableBottom="@drawable/line"
+                    android:orientation="horizontal"
+                    android:padding="15dp"
+                    app:layout_constraintTop_toBottomOf="@+id/lImapServer">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:width="60pt"
+                        android:text="Imap порт"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0" />
+
+                    <EditText
+                        android:id="@+id/editTextImapPort"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:inputType="number"
+                        android:text="Imap port"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.502"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lSmtpServer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:drawableBottom="@drawable/line"
+                    android:orientation="horizontal"
+                    android:padding="15dp"
+                    app:layout_constraintTop_toBottomOf="@+id/lImapPort">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:width="60pt"
+                        android:text="Smtp сервер"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0" />
+
+                    <EditText
+                        android:id="@+id/editTextSmtpServer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:ems="10"
+                        android:inputType="textPersonName"
+                        android:text="Smtp server"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.502"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lSmtpPort"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:drawableBottom="@drawable/line"
+                    android:orientation="horizontal"
+                    android:padding="15dp"
+                    app:layout_constraintTop_toBottomOf="@+id/lSmtpServer">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:width="60pt"
+                        android:text="Smtp порт"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0" />
+
+                    <EditText
+                        android:id="@+id/editTextSmtpPort"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:inputType="number"
+                        android:text="Smtp port"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.502"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lMailBoxes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:drawableBottom="@drawable/line"
+                    android:orientation="horizontal"
+                    android:padding="15dp"
+                    app:layout_constraintTop_toBottomOf="@+id/lSmtpPort">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:width="60pt"
+                        android:text="Ящик"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0" />
+
+                    <Spinner
+                        android:id="@+id/spinnerMailBoxes"
+                        android:layout_width="212dp"
+                        android:layout_height="46dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/checkBoxCrypt"
+                    android:layout_width="262dp"
+                    android:layout_height="61dp"
+                    android:layout_marginTop="24dp"
+                    android:ems="10"
+                    android:text="Шифровать содержимое сообщения"
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.504"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/lMailBoxes" />
+
+                <CheckBox
+                    android:id="@+id/checkBoxSign"
+                    android:layout_width="262dp"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Подписывать сообщение"
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/checkBoxCrypt" />
+
+                <Button
+                    android:id="@+id/buttonSave"
+                    android:layout_width="263dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Сохранить"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/checkBoxSign" />
+            </android.support.constraint.ConstraintLayout>
+        </ScrollView>
 
         <android.support.constraint.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_begin="20dp" />
-
-    </android.support.constraint.ConstraintLayout>
+                android:id="@+id/guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="20dp" />
+        </android.support.constraint.ConstraintLayout>
 </FrameLayout>

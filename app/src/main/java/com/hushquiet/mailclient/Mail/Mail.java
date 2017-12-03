@@ -74,10 +74,12 @@ public class Mail {
 
 
     public static boolean isAuth(String email, String password) {
+        DB db = DB.getInstance(null);
+        Settings settings = new Settings(db.getSettings(db.getAuthUserID()));
         String   IMAP_AUTH_EMAIL = email;
         String   IMAP_AUTH_PWD   = password;
-        String   IMAP_Server     = "imap.yandex.ru";
-        String   IMAP_Port       = "993";
+        String   IMAP_Server     = settings.imapServer;
+        String   IMAP_Port       = settings.imapPort + "";
 
         Properties properties = new Properties();
         properties.put("mail.debug"          , "false"  );
@@ -105,17 +107,19 @@ public class Mail {
 
     public void read(String email, String password) {
         MailBox mailBox = DB.getInstance(null).getCurrentMailbox();
+        DB db = DB.getInstance(null);
+        Settings settings = new Settings(db.getSettings(db.getAuthUserID()));
 
         String   IMAP_AUTH_EMAIL = email;
         String   IMAP_AUTH_PWD   = password;
-        String   IMAP_Server     = "imap.yandex.ru";
-        String   IMAP_Port       = "993"           ;
+        String   IMAP_Server     = settings.imapServer;
+        int      IMAP_Port       = settings.imapPort;
 
         Properties properties = new Properties();
         properties.put("mail.debug"          , "false"  );
         properties.put("mail.store.protocol" , "imaps"  );
         properties.put("mail.imap.ssl.enable", "true"   );
-        properties.put("mail.imap.port"      , IMAP_Port);
+        properties.put("mail.imap.port"      , IMAP_Port + "");
 
         Authenticator auth = new EmailAuthenticator(IMAP_AUTH_EMAIL,
                 IMAP_AUTH_PWD);
@@ -177,7 +181,6 @@ public class Mail {
 
 
                 if (subject.contains("[CRYPT]")) {
-                    DB db = DB.getInstance(null);
                     User user = new User(db.getUser(db.getAuthUserID()));
                   //  subject = subject.replace("\r", "");
                     DesEncrypter desEncrypter = new DesEncrypter();
@@ -237,6 +240,8 @@ public class Mail {
 
     public static byte[] readAllBytes(InputStream is) throws IOException
     {
+        if (is == null)
+            return null;
         final int BUFFER_SIZE = 64 * 1024;
         BufferedInputStream bis = new BufferedInputStream(is);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -254,9 +259,11 @@ public class Mail {
     public void send(final String emailTo, final String subject, final String body, String email, String password, String pathFile)
     {
         result = false;
+        DB db = DB.getInstance(null);
+        Settings settings = new Settings(db.getSettings(db.getAuthUserID()));
         Properties properties = new Properties();
-        properties.put("mail.smtp.host", SMTP_SERVER);
-        properties.put("mail.smtp.port", SMTP_Port);
+        properties.put("mail.smtp.host", settings.smtpServer);
+        properties.put("mail.smtp.port", settings.smtpPort + "");
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.ssl.enable", "true");
         properties.put("mail.smtp.socketFactory.class",
@@ -299,7 +306,6 @@ public class Mail {
             Transport transport = session.getTransport("smtps");
             transport.send(message);
             result = true;
-            DB db = DB.getInstance(null);
             String name = null;
             InputStream in = null;
             if (pathFile != null) {

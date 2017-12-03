@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.hushquiet.mailclient.Activities.Interfaces.OnFragmentInteractionListener;
 import com.hushquiet.mailclient.DB.DB;
+import com.hushquiet.mailclient.Mail.Settings;
 import com.hushquiet.mailclient.R;
 
 public class SettingsFragment extends Fragment {
@@ -34,6 +35,8 @@ public class SettingsFragment extends Fragment {
 
     private EditText editTextName;
     private EditText editTextLastName;
+    private EditText editTextImapServer, editTextImapPort;
+    private EditText editTextSmptServer, editTextSmtpPort;
     private CheckBox checkBoxCrypt;
     private CheckBox checkBoxSign;
     private Button buttonSave;
@@ -80,9 +83,16 @@ public class SettingsFragment extends Fragment {
         final View root = inflater.inflate(R.layout.fragment_settings, container, false);
         context = root.getContext();
         DB db = DB.getInstance(root.getContext());
+        Settings settings = new Settings(db.getSettings(db.getAuthUserID()));
         editTextName = (EditText)root.findViewById(R.id.editTextName);
         buttonSave = (Button)root.findViewById(R.id.buttonSave);
         editTextLastName = (EditText)root.findViewById(R.id.editTextLastName);
+
+        editTextImapPort = (EditText)root.findViewById(R.id.editTextImapPort);
+        editTextImapServer = (EditText)root.findViewById(R.id.editTextImapServer);
+        editTextSmptServer = (EditText)root.findViewById(R.id.editTextSmtpServer);
+        editTextSmtpPort = (EditText)root.findViewById(R.id.editTextSmtpPort);
+
         editTextName = (EditText)root.findViewById(R.id.editTextName);
         checkBoxCrypt = (CheckBox)root.findViewById(R.id.checkBoxCrypt);
         checkBoxSign = (CheckBox)root.findViewById(R.id.checkBoxSign);
@@ -108,6 +118,10 @@ public class SettingsFragment extends Fragment {
 
         cursor = db.getSettings(db.getAuthUserID());
 
+        editTextSmtpPort.setText(settings.smtpPort + "");
+        editTextSmptServer.setText(settings.smtpServer);
+        editTextImapServer.setText(settings.imapServer);
+        editTextImapPort.setText(settings.imapPort + "");
         if (cursor.getInt(cursor.getColumnIndex(DB.SETTINGS_CRYPT)) == 0) {
             checkBoxCrypt.setChecked(false);
         } else checkBoxCrypt.setChecked(true);
@@ -125,7 +139,12 @@ public class SettingsFragment extends Fragment {
                 int crypt = checkBoxCrypt.isChecked() ? 1 : 0;
                 String name = editTextName.getText().toString();
                 String lastName = editTextLastName.getText().toString();
-                if (db.updateSettings(id, sign, crypt, db.getIdMailBox(spinnerMailBoxes.getSelectedItem().toString())) && db.updateUser(id, name, lastName)) {
+                if (db.updateSettings(id, sign, crypt, db.getIdMailBox(spinnerMailBoxes.getSelectedItem().toString()),
+                        Integer.parseInt(editTextSmtpPort.getText().toString()),
+                        Integer.parseInt(editTextImapPort.getText().toString()),
+                        editTextImapServer.getText().toString(),
+                        editTextSmptServer.getText().toString())
+                        && db.updateUser(id, name, lastName)) {
                     Toast.makeText(root.getContext(), "Данные обновлены.", Toast.LENGTH_LONG).show();
                 }
             }
